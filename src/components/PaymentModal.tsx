@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Share2, Smartphone, ShieldCheck, Trophy } from 'lucide-react';
+import { SiGooglepay, SiPhonepe, SiPaytm } from 'react-icons/si';
 
 interface PaymentModalProps {
     isOpen: boolean;
@@ -11,6 +12,12 @@ interface PaymentModalProps {
 export const PaymentModal = ({ isOpen, onClose, amount, userName }: PaymentModalProps) => {
     const upiId = "9072319137@okbizaxis"; // Example GPay UPI ID format
     const upiLink = `upi://pay?pa=${upiId}&pn=MAS%20CLUB&am=${amount}&cu=INR`;
+
+    const upiApps = [
+        { name: 'Google Pay', short: 'GPay', id: '9072319137', color: '#4285F4', Icon: SiGooglepay },
+        { name: 'PhonePe', short: 'PhonePe', id: '9072319137', color: '#6739B7', Icon: SiPhonepe },
+        { name: 'Paytm', short: 'Paytm', id: '9072319137', color: '#00BAF2', Icon: SiPaytm }
+    ];
 
     return (
         <AnimatePresence>
@@ -117,11 +124,7 @@ export const PaymentModal = ({ isOpen, onClose, amount, userName }: PaymentModal
                                     <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Select UPI Apps</h3>
 
                                     <div className="space-y-3">
-                                        {[
-                                            { name: 'Google Pay', short: 'GPay', id: '9072319137', color: '#4285F4', icon: 'https://cdn.iconscout.com/icon/free/png-256/free-google-pay-2093234-1776703.png' },
-                                            { name: 'PhonePe', short: 'PhonePe', id: '9072319137', color: '#6739B7', icon: 'https://cdn.iconscout.com/icon/free/png-256/free-phonepe-logo-icon-download-in-svg-png-gif-file-formats--technology-social-media-vol-4-pack-logos-icons-2945037.png?f=webp&w=256' },
-                                            { name: 'Paytm', short: 'Paytm', id: '9072319137', color: '#00BAF2', icon: 'https://cdn.iconscout.com/icon/free/png-256/free-paytm-226448.png' }
-                                        ].map((app) => (
+                                        {upiApps.map((app) => (
                                             <motion.button
                                                 key={app.short}
                                                 whileTap={{ scale: 0.98 }}
@@ -132,7 +135,7 @@ export const PaymentModal = ({ isOpen, onClose, amount, userName }: PaymentModal
                                                 }}
                                             >
                                                 <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
-                                                    <img src={app.icon} alt={app.name} className="w-6 h-6 object-contain" />
+                                                    <app.Icon size={24} style={{ color: app.color }} />
                                                 </div>
                                                 <div className="flex flex-col items-start leading-none">
                                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{app.short}</span>
@@ -150,7 +153,6 @@ export const PaymentModal = ({ isOpen, onClose, amount, userName }: PaymentModal
                                 </div>
                             </div>
 
-                            {/* Security Footer */}
                             <div className="px-10 mt-10">
                                 <div className="flex flex-col items-center gap-2 text-center">
                                     <div className="flex items-center gap-2 text-green-600">
