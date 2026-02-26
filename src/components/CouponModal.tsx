@@ -1,13 +1,21 @@
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Trophy } from 'lucide-react';
 
 interface CouponModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onPay: (name: string) => void;
 }
 
-export const CouponModal = ({ isOpen, onClose }: CouponModalProps) => {
+export const CouponModal = ({ isOpen, onClose, onPay }: CouponModalProps) => {
     const amount = '100';
+    const [name, setName] = useState('');
+
+    const handlePay = () => {
+        if (!name.trim()) return; // Simple validation
+        onPay(name);
+    };
 
     return (
         <AnimatePresence>
@@ -45,7 +53,13 @@ export const CouponModal = ({ isOpen, onClose }: CouponModalProps) => {
                             <div className="space-y-5">
                                 <div>
                                     <label className="block text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">Full Name</label>
-                                    <input type="text" className="input-field" placeholder="Enter your name" />
+                                    <input
+                                        type="text"
+                                        className="input-field"
+                                        placeholder="Enter your name"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                    />
                                 </div>
 
                                 <div className="flex items-center gap-3 py-1">
@@ -88,7 +102,10 @@ export const CouponModal = ({ isOpen, onClose }: CouponModalProps) => {
                             </div>
 
                             {/* Submit Button */}
-                            <button className="btn-primary w-full py-6 text-2xl flex items-center justify-center gap-4 shadow-brand-secondary/20">
+                            <button
+                                onClick={handlePay}
+                                className="btn-primary w-full py-6 text-2xl flex items-center justify-center gap-4 shadow-brand-secondary/20"
+                            >
                                 <Trophy size={24} className="text-white animate-bounce" />
                                 Pay Now
                             </button>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   History,
   Phone,
@@ -9,10 +9,14 @@ import {
   ChevronRight,
   TrendingUp
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { CouponModal } from './components/CouponModal';
 import { TransactionsModal } from './components/TransactionsModal';
 import { HistoryModal } from './components/HistoryModal';
+import { PaymentModal } from './components/PaymentModal';
+
+import banner1 from './assets/banner/m1.jpeg';
+import banner2 from './assets/banner/m2.jpeg';
 
 // --- Types ---
 interface ActionItemProps {
@@ -41,6 +45,24 @@ export default function App() {
   const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
   const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [activeUserName, setActiveUserName] = useState('');
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const banners = [banner1, banner2];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % banners.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleCouponPay = (name: string) => {
+    setActiveUserName(name);
+    setIsCouponModalOpen(false);
+    setIsPaymentModalOpen(true);
+  };
 
   const aboutProject = {
     title: "About the Project",
@@ -117,6 +139,52 @@ export default function App() {
 
       <div className="px-6 -mt-16 space-y-10 relative z-20">
 
+        {/* Banner Carousel - Full Image View */}
+        <motion.div
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="relative aspect-video w-full rounded-[40px] overflow-hidden shadow-2xl border-4 border-white bg-black group"
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8 }}
+              className="absolute inset-0 flex items-center justify-center overflow-hidden"
+            >
+              {/* Blurred Background Layer (Premium Feel) */}
+              <img
+                src={banners[currentSlide]}
+                className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 scale-110"
+                alt=""
+              />
+
+              {/* Main Image Layer (Full Image - No Cropping) */}
+              <img
+                src={banners[currentSlide]}
+                className="relative z-10 w-full h-full object-contain"
+                alt={`Banner ${currentSlide + 1}`}
+              />
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Navigation Indicators */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+            {banners.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentSlide(i)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${i === currentSlide ? 'bg-brand-secondary w-6' : 'bg-white/40'}`}
+              />
+            ))}
+          </div>
+
+          <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+        </motion.div>
+
         {/* About Section */}
         <motion.div
           initial={{ y: 40, opacity: 0 }}
@@ -190,10 +258,12 @@ export default function App() {
         </div>
 
         {/* Footer Policy */}
-        <div className="flex justify-center gap-6 py-8">
-          <button className="text-[10px] font-black text-black uppercase tracking-widest hover:text-brand-primary transition-colors">Privacy</button>
-          <button className="text-[10px] font-black text-black uppercase tracking-widest hover:text-brand-primary transition-colors">Terms</button>
-          <button className="text-[10px] font-black text-black uppercase tracking-widest hover:text-brand-primary transition-colors">Contact</button>
+        <div className="flex justify-center gap-3 py-8">
+          {['Privacy', 'Terms', 'Contact'].map((item) => (
+            <button key={item} className="px-5 py-2.5 rounded-2xl bg-white border border-gray-100 shadow-sm text-[10px] font-black text-brand-primary uppercase tracking-widest hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all duration-300 active:scale-95">
+              {item}
+            </button>
+          ))}
         </div>
 
         <div className="text-center pb-8">
@@ -226,6 +296,7 @@ export default function App() {
       <CouponModal
         isOpen={isCouponModalOpen}
         onClose={() => setIsCouponModalOpen(false)}
+        onPay={handleCouponPay}
       />
       <TransactionsModal
         isOpen={isTransactionsModalOpen}
@@ -234,6 +305,12 @@ export default function App() {
       <HistoryModal
         isOpen={isHistoryModalOpen}
         onClose={() => setIsHistoryModalOpen(false)}
+      />
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        amount="100"
+        userName={activeUserName}
       />
     </div>
   );
