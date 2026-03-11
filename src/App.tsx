@@ -26,6 +26,8 @@ import banner45 from './assets/banner/45.jpeg';
 import logo from './assets/banner/logo.png';
 
 // --- Types ---
+
+
 interface ActionItemProps {
   icon: React.ReactNode;
   label: string;
