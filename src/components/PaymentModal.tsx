@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Share2, Smartphone, ShieldCheck, Trophy } from 'lucide-react';
+import { ArrowLeft, Share2, Smartphone, ShieldCheck, Trophy, CheckCircle2, Copy } from 'lucide-react';
 import { SiGooglepay, SiPhonepe, SiPaytm } from 'react-icons/si';
 
 interface PaymentModalProps {
@@ -10,6 +11,10 @@ interface PaymentModalProps {
 }
 
 export const PaymentModal = ({ isOpen, onClose, amount, userName }: PaymentModalProps) => {
+    const [status, setStatus] = useState<'idle' | 'processing' | 'success'>('idle');
+    const [selectedApp, setSelectedApp] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false);
+
     const upiId = "9072319137@okbizaxis"; // Example GPay UPI ID format
     const upiLink = `upi://pay?pa=${upiId}&pn=MAS%20CLUB&am=${amount}&cu=INR`;
 
@@ -19,6 +24,32 @@ export const PaymentModal = ({ isOpen, onClose, amount, userName }: PaymentModal
         { name: 'Paytm', short: 'Paytm', id: '9072319137', color: '#00BAF2', Icon: SiPaytm }
     ];
 
+    const handleCopy = (text: string) => {
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handlePayment = (appName: string) => {
+        setSelectedApp(appName);
+        setStatus('processing');
+
+        // Simulating Backend Call
+        setTimeout(() => {
+            setStatus('success');
+        }, 2500);
+    };
+
+    const handleClose = () => {
+        setStatus('idle');
+        setSelectedApp(null);
+        setCopied(false);
+        onClose();
+    };
+
+    // Dummy transaction ID for demonstration
+    const transactionId = "TRX1234567890";
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -27,7 +58,7 @@ export const PaymentModal = ({ isOpen, onClose, amount, userName }: PaymentModal
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="absolute inset-0 bg-brand-primary/60 backdrop-blur-md"
                     />
                     <motion.div
@@ -40,7 +71,7 @@ export const PaymentModal = ({ isOpen, onClose, amount, userName }: PaymentModal
                         {/* Header */}
                         <div className="bg-white/80 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-gray-100 sticky top-0 z-20">
                             <button
-                                onClick={onClose}
+                                onClick={handleClose}
                                 className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-brand-primary hover:bg-gray-100 transition-colors"
                             >
                                 <ArrowLeft size={20} />
@@ -128,7 +159,9 @@ export const PaymentModal = ({ isOpen, onClose, amount, userName }: PaymentModal
                                             <motion.button
                                                 key={app.short}
                                                 whileTap={{ scale: 0.98 }}
-                                                className="flex items-center gap-4 px-5 py-4 rounded-[2rem] border transition-all w-full group"
+                                                onClick={() => handlePayment(app.name)}
+                                                disabled={status !== 'idle'}
+                                                className="flex items-center gap-4 px-5 py-4 rounded-[2rem] border transition-all w-full group relative overflow-hidden"
                                                 style={{
                                                     backgroundColor: `${app.color}08`,
                                                     borderColor: `${app.color}20`
@@ -147,6 +180,15 @@ export const PaymentModal = ({ isOpen, onClose, amount, userName }: PaymentModal
                                                 >
                                                     <ArrowLeft size={16} className="rotate-180" />
                                                 </div>
+
+                                                {status === 'processing' && selectedApp === app.name && (
+                                                    <motion.div
+                                                        initial={{ x: "-100%" }}
+                                                        animate={{ x: "100%" }}
+                                                        transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
+                                                    />
+                                                )}
                                             </motion.button>
                                         ))}
                                     </div>
@@ -165,6 +207,89 @@ export const PaymentModal = ({ isOpen, onClose, amount, userName }: PaymentModal
                                 </div>
                             </div>
                         </div>
+
+                        {/* Success Overlay */}
+                        <AnimatePresence>
+                            {status === 'success' && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="absolute inset-0 z-50 bg-white flex flex-col items-center justify-center px-10 text-center"
+                                >
+                                    <motion.div
+                                        initial={{ scale: 0.5, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        transition={{ type: "spring", damping: 15 }}
+                                        className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center text-green-600 mb-8"
+                                    >
+                                        <CheckCircle2 size={48} />
+                                    </motion.div>
+
+                                    <motion.div
+                                        initial={{ y: 20, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        transition={{ delay: 0.2 }}
+                                    >
+                                        <h2 className="text-4xl font-black text-brand-primary tracking-tighter mb-2">Payment Successful!</h2>
+                                        <p className="text-gray-400 font-bold text-sm mb-10 tracking-wide uppercase">Your contribution has been received</p>
+                                    </motion.div>
+
+                                    <motion.div
+                                        initial={{ scale: 0.9, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        transition={{ delay: 0.4 }}
+                                        className="bg-gray-50 rounded-[40px] p-8 w-full border border-gray-100 mb-10"
+                                    >
+                                        <div className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">Transaction Details</div>
+                                        <div className="flex flex-col items-center gap-1 mb-6">
+                                            <div className="text-5xl font-black text-brand-primary tabular-nums">
+                                                <span className="text-2xl font-black text-brand-secondary">₹</span>
+                                                {amount}
+                                            </div>
+                                            <div className="text-xs font-black text-brand-primary/40 uppercase tracking-widest">{userName}</div>
+                                        </div>
+
+                                        <div className="space-y-3 pt-4 border-t border-gray-200/50">
+                                            <div className="flex justify-between items-center text-xs font-bold">
+                                                <span className="text-gray-400">Status</span>
+                                                <span className="text-green-600 uppercase tracking-widest">Completed</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-xs font-bold">
+                                                <span className="text-gray-400">Trans ID</span>
+                                                <div
+                                                    className="flex items-center gap-2 cursor-pointer group/copy relative"
+                                                    onClick={() => handleCopy(transactionId)}
+                                                >
+                                                    <span className="text-brand-primary">{transactionId}</span>
+                                                    {copied ? (
+                                                        <motion.span
+                                                            initial={{ scale: 0 }}
+                                                            animate={{ scale: 1 }}
+                                                            className="text-[8px] bg-green-500 text-white px-1.5 py-0.5 rounded flex items-center gap-1"
+                                                        >
+                                                            Copied!
+                                                        </motion.span>
+                                                    ) : (
+                                                        <Copy size={12} className="text-gray-300 group-hover/copy:text-brand-secondary transition-colors" />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+
+                                    <motion.button
+                                        initial={{ y: 20, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        transition={{ delay: 0.6 }}
+                                        onClick={handleClose}
+                                        className="btn-primary w-full py-6 text-xl shadow-green-600/20"
+                                        style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)' }}
+                                    >
+                                        Done
+                                    </motion.button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
                         {/* Bottom Decoration */}
                         <div className="flex justify-center mb-6">

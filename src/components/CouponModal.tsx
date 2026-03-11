@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Trophy } from 'lucide-react';
+import {  Trophy, Plus, Minus } from 'lucide-react';
 
 interface CouponModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onPay: (name: string) => void;
+    onPay: (name: string, amount: number) => void;
 }
 
 export const CouponModal = ({ isOpen, onClose, onPay }: CouponModalProps) => {
-    const amount = '100';
+    const [amount, setAmount] = useState(100);
     const [name, setName] = useState('');
 
     const handlePay = () => {
         if (!name.trim()) return; // Simple validation
-        onPay(name);
+        onPay(name, amount);
     };
 
     return (
@@ -42,11 +42,42 @@ export const CouponModal = ({ isOpen, onClose, onPay }: CouponModalProps) => {
 
                         <div className="px-6 sm:px-10 pb-8 sm:pb-10 space-y-6 sm:space-y-8">
                             {/* Amount Display (Static) */}
-                            <div className="relative flex justify-center items-center py-6 bg-brand-secondary/5 rounded-[40px] border-2 border-brand-secondary/20 shadow-inner mt-4">
-                                <div className="text-5xl font-black text-brand-primary flex items-center gap-1">
-                                    <span className="text-3xl font-black text-brand-secondary">₹</span>
-                                    {amount}
+                            <div className="relative flex justify-between items-center py-6 px-6 bg-brand-secondary/5 rounded-[30px] border-2 border-brand-secondary/20 mt-4 overflow-hidden">
+                                {/* Decorative background accent */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-brand-secondary/[0.02] to-transparent pointer-events-none" />
+
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setAmount(prev => Math.max(100, prev - 100));
+                                    }}
+                                    className="relative z-10 w-14 h-14 rounded-2xl bg-white shadow-xl flex items-center justify-center text-brand-primary hover:bg-brand-secondary hover:text-white transition-colors duration-200 border-2 border-brand-secondary/10 disabled:opacity-30 disabled:pointer-events-none"
+                                    disabled={amount <= 100}
+                                >
+                                    <Minus size={28} strokeWidth={3} />
+                                </motion.button>
+
+                                <div className="relative z-10 flex flex-col items-center">
+                                    <span className="text-[10px] font-black text-brand-secondary uppercase tracking-[0.2em] mb-1 opacity-60">Select Amount</span>
+                                    <div className="text-5xl font-black text-brand-primary flex items-center gap-1 tabular-nums">
+                                        <span className="text-2xl font-black text-brand-secondary">₹</span>
+                                        {amount}
+                                    </div>
                                 </div>
+
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setAmount(prev => prev + 100);
+                                    }}
+                                    className="relative z-10 w-14 h-14 rounded-2xl bg-white shadow-xl flex items-center justify-center text-brand-primary hover:bg-brand-secondary hover:text-white transition-colors duration-200 border-2 border-brand-secondary/10"
+                                >
+                                    <Plus size={28} strokeWidth={3} />
+                                </motion.button>
                             </div>
 
                             {/* Form Fields */}
@@ -62,29 +93,13 @@ export const CouponModal = ({ isOpen, onClose, onPay }: CouponModalProps) => {
                                     />
                                 </div>
 
-                                <div className="flex items-center gap-3 py-1">
-                                    <div className="relative flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id="hideName"
-                                            className="peer appearance-none w-6 h-6 rounded-lg border-2 border-gray-200 checked:bg-brand-secondary checked:border-brand-secondary transition-all cursor-pointer"
-                                        />
-                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-white opacity-0 peer-checked:opacity-100 transition-opacity">
-                                            <Shield size={12} fill="currentColor" />
-                                        </div>
-                                    </div>
-                                    <label htmlFor="hideName" className="text-sm font-bold text-gray-600 cursor-pointer select-none">
-                                        Hide Name <span className="text-[10px] text-gray-400 font-medium ml-1">(Participate Anonymously)</span>
-                                    </label>
-                                </div>
-
                                 <div>
                                     <label className="block text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">Mobile Number</label>
                                     <input type="tel" className="input-field" placeholder="+91 00000 00000" />
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">Place / Unit</label>
+                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">Place</label>
                                     <input type="text" className="input-field" placeholder="Enter your place" />
                                 </div>
                             </div>
