@@ -23,7 +23,7 @@ import banner1 from './assets/banner/m1.jpeg';
 import banner2 from './assets/banner/m2.jpeg';
 import banner35 from './assets/banner/35.jpeg';
 import banner45 from './assets/banner/45.jpeg';
-import logo from './assets/banner/logo.png';
+import logo from './assets/banner/logo.PNG';
 
 // --- Types ---
 
